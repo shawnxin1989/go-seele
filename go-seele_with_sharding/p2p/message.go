@@ -30,13 +30,14 @@ type Message struct {
 	ReceivedAt time.Time
 }
 
-func SendMessage(write MsgWriter, code uint16, payload []byte) error {
+// SendMessage send message to peer
+func SendMessage(writer MsgWriter, code uint16, payload []byte) error {
 	msg := Message{
 		Code:    code,
 		Payload: payload,
 	}
 
-	return write.WriteMsg(msg)
+	return writer.WriteMsg(&msg)
 }
 
 // Zip compress message when the length of payload is greater than zipBytesLimit
@@ -79,7 +80,7 @@ func (msg *Message) UnZip() error {
 		return err
 	}
 
-	msg.Payload = arrayByte
+	(*msg).Payload = arrayByte
 	return nil
 }
 
@@ -94,7 +95,7 @@ type ProtoHandShake struct {
 
 type MsgReader interface {
 	// ReadMsg read a message. It will block until send the message out or get errors
-	ReadMsg() (Message, error)
+	ReadMsg() (*Message, error)
 }
 
 type MsgWriter interface {
@@ -103,7 +104,7 @@ type MsgWriter interface {
 	//
 	// Note that messages can be sent only once because their
 	// payload reader is drained.
-	WriteMsg(Message) error
+	WriteMsg(*Message) error
 }
 
 // MsgReadWriter provides reading and writing of encoded messages.

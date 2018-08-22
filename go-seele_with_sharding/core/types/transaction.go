@@ -15,7 +15,7 @@ import (
 
 	"github.com/seeleteam/go-seele/common"
 	"github.com/seeleteam/go-seele/crypto"
-	"github.com/seeleteam/go-seele/merkle"
+	"github.com/seeleteam/go-seele/trie"
 )
 
 const (
@@ -70,7 +70,7 @@ type TransactionData struct {
 	AccountNonce uint64         // AccountNonce is the nonce of the sender account
 	Fee          *big.Int       // Transaction Fee
 	Timestamp    uint64         // Timestamp is used for the miner reward transaction, referring to the block timestamp
-	Payload      []byte         // Payload is the extra data of the transaction
+	Payload      common.Bytes   // Payload is the extra data of the transaction
 }
 
 // Transaction represents a transaction in the blockchain.
@@ -278,16 +278,8 @@ func (tx *Transaction) ValidateState(statedb stateDB) error {
 }
 
 // CalculateHash calculates and returns the transaction hash.
-// This is to implement the merkle.Content interface.
 func (tx *Transaction) CalculateHash() common.Hash {
 	return crypto.MustHash(tx.Data)
-}
-
-// Equals indicates if the transaction is equal to the specified content.
-// This is to implement the merkle.Content interface.
-func (tx *Transaction) Equals(other merkle.Content) bool {
-	otherTx, ok := other.(*Transaction)
-	return ok && tx.Hash.Equal(otherTx.Hash)
 }
 
 // MerkleRootHash calculates and returns the merkle root hash of the specified transactions.
@@ -297,14 +289,21 @@ func MerkleRootHash(txs []*Transaction) common.Hash {
 		return emptyTxRootHash
 	}
 
-	contents := make([]merkle.Content, len(txs))
-	for i, tx := range txs {
-		contents[i] = tx
+	emptyTrie, err := trie.NewTrie(common.EmptyHash, make([]byte, 0), nil)
+	if err != nil {
+		panic(err)
 	}
 
-	bmt, _ := merkle.NewTree(contents)
+	for _, tx := range txs {
+		buff := common.SerializePanic(tx)
+		if tx.Hash != common.EmptyHash {
+			emptyTrie.Put(tx.Hash.Bytes(), buff)
+		} else {
+			emptyTrie.Put(tx.CalculateHash().Bytes(), buff)
+		}
+	}
 
-	return bmt.MerkleRoot()
+	return emptyTrie.Hash()
 }
 
 // BatchValidateTxs validates the state independent fields of specified txs in multiple threads.

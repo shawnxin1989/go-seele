@@ -27,10 +27,10 @@ import (
 )
 
 const (
-	// Maximun number of peers that can be connected
+	// Maximum number of peers that can be connected
 	defaultMaxPeers = 500
 
-	// Maximum number of concurrently handshaking inbound connections.
+	// Maximum number of inbound connections for concurrent handshaking.
 	maxAcceptConns = 50
 
 	defaultDialTimeout = 15 * time.Second
@@ -48,7 +48,7 @@ const (
 	extraDataLen = 24
 )
 
-//P2PConfig is the Configuration of p2p
+// Config is the Configuration of p2p
 type Config struct {
 	// p2p.server will listen for incoming tcp connections. And it is for udp address used for Kad protocol
 	ListenAddr string `json:"address"`
@@ -56,7 +56,7 @@ type Config struct {
 	// NetworkID used to define net type, for example main net and test net.
 	NetworkID uint64 `json:"networkID"`
 
-	// static nodes which will be connected to find more nodes when the node starts
+	// static nodes which will be connected to find more nodes when the node started
 	StaticNodes []*discovery.Node `json:"staticNodes"`
 
 	// SubPrivateKey which will be make PrivateKey
@@ -121,24 +121,23 @@ func (srv *Server) PeerCount() int {
 	return srv.peerSet.count()
 }
 
-// Start starts running the server.
+// Start starts the server.
 func (srv *Server) Start(nodeDir string, shard uint) (err error) {
 	srv.lock.Lock()
 	defer srv.lock.Unlock()
+
 	if srv.running {
 		return errors.New("server already running")
 	}
 
-	srv.running = true
-	srv.log.Debug("Starting P2P networking...")
-	// self node
 	address := crypto.GetAddress(&srv.PrivateKey.PublicKey)
 	addr, err := net.ResolveUDPAddr("udp", srv.ListenAddr)
-
-	srv.SelfNode = discovery.NewNodeWithAddr(*address, addr, shard)
 	if err != nil {
 		return err
 	}
+
+	srv.log.Debug("Starting P2P networking...")
+	srv.SelfNode = discovery.NewNodeWithAddr(*address, addr, shard)
 
 	srv.log.Info("p2p.Server.Start: MyNodeID [%s]", srv.SelfNode)
 	srv.kadDB = discovery.StartService(nodeDir, *address, addr, srv.StaticNodes, shard)
@@ -482,19 +481,19 @@ func (srv *Server) doHandShake(caps []Cap, peer *Peer, flags int, dialDest *disc
 
 // packWrapHSMsg compose the wrapped send msg.
 // A 32 byte ExtraData is used for verification process.
-func (srv *Server) packWrapHSMsg(handshakeMsg *ProtoHandShake, peerNodeID []byte, nounceCnt uint64) (Message, error) {
+func (srv *Server) packWrapHSMsg(handshakeMsg *ProtoHandShake, peerNodeID []byte, nounceCnt uint64) (*Message, error) {
 	// Serialize should handle big-endian
 	hdmsgRLP, err := common.Serialize(handshakeMsg)
 
 	if err != nil {
-		return Message{}, err
+		return &Message{}, err
 	}
 	wrapMsg := Message{
 		Code: ctlMsgProtoHandshake,
 	}
 	md5Inst := md5.New()
 	if _, err := md5Inst.Write(hdmsgRLP); err != nil {
-		return Message{}, err
+		return &Message{}, err
 	}
 	extBuf := make([]byte, extraDataLen)
 
@@ -515,11 +514,11 @@ func (srv *Server) packWrapHSMsg(handshakeMsg *ProtoHandShake, peerNodeID []byte
 	copy(wrapMsg.Payload, hdmsgRLP)
 	copy(wrapMsg.Payload[len(hdmsgRLP):], enc)
 	binary.BigEndian.PutUint32(wrapMsg.Payload[len(hdmsgRLP)+len(enc):], uint32(len(enc)))
-	return wrapMsg, nil
+	return &wrapMsg, nil
 }
 
 // unPackWrapHSMsg verify received msg, and recover the handshake msg
-func (srv *Server) unPackWrapHSMsg(recvWrapMsg Message) (recvMsg *ProtoHandShake, nounceCnt uint64, err error) {
+func (srv *Server) unPackWrapHSMsg(recvWrapMsg *Message) (recvMsg *ProtoHandShake, nounceCnt uint64, err error) {
 	size := uint32(len(recvWrapMsg.Payload))
 	if size < extraDataLen+4 {
 		err = errors.New("received msg with invalid length")
