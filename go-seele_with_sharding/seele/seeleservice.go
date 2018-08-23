@@ -49,6 +49,7 @@ func (s *SeeleService) Downloader() *downloader.Downloader {
 }
 
 // NewSeeleService create SeeleService
+// TODO: add stopAllChainDB function
 func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) (s *SeeleService, err error) {
 	s = &SeeleService{
 		log:       log,
