@@ -76,7 +76,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 	log.Info("NewSeeleService account state datadir is %s", accountStateDBPath)
 	s.accountStateDB, err = leveldb.NewLevelDB(accountStateDBPath)
 	if err != nil {
-		for i:=0; i < numOfShard; i++ {
+		for i := 0; i < numOfShard; i++ {
 			s.chainDB[i].Close()
 		}
 		log.Error("NewSeeleService Create BlockChain err: failed to create account state DB, %s", err)
@@ -85,13 +85,13 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 
 	// initialize and validate genesis
 	// TODO add different genesis for different shard
-	for i:=0; i < numOfShard; i++ {
+	for i := 0; i < numOfShard; i++ {
 		bcStore := store.NewCachedStore(store.NewBlockchainDatabase(s.chainDB[i]))
 		genesis := core.GetGenesis(conf.SeeleConfig.GenesisConfig)
 
 		err = genesis.InitializeAndValidate(bcStore, s.accountStateDB)
 		if err != nil {
-			for i:=0; i < numOfShard; i++ {
+			for i := 0; i < numOfShard; i++ {
 				s.chainDB[i].Close()
 			}
 			s.accountStateDB.Close()
@@ -103,7 +103,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 		recoveryPointFile := filepath.Join(serviceContext.DataDir, BlockChainRecoveryPointFile,shardNumString)
 		s.chain[i], err = core.NewBlockchain(bcStore, s.accountStateDB, recoveryPointFile)
 		if err != nil {
-			for i:=0; i < numOfShard; i++ {
+			for i := 0; i < numOfShard; i++ {
 				s.chainDB[i].Close()
 			}
 			s.accountStateDB.Close()
@@ -113,7 +113,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 
 		s.txPool[i], err = core.NewTransactionPool(conf.SeeleConfig.TxConf, s.chain[i])
 		if err != nil {
-			for i:=0; i < numOfShard; i++ {
+			for i := 0; i < numOfShard; i++ {
 				s.chainDB[i].Close()
 			}
 			s.accountStateDB.Close()
@@ -124,7 +124,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 
 	s.seeleProtocol, err = NewSeeleProtocol(s, log)
 	if err != nil {
-		for i:=0; i < numOfShard; i++ {
+		for i := 0; i < numOfShard; i++ {
 			s.chainDB[i].Close()
 		}
 		s.accountStateDB.Close()
