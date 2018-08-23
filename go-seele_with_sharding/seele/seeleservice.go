@@ -30,7 +30,7 @@ type SeeleService struct {
 
 	txPool         *core.TransactionPool
 	chain          *core.Blockchain
-	chainDB        database.Database // database used to store blocks.
+	chainDB        []database.Database // database used to store blocks.
 	accountStateDB database.Database // database used to store account state info.
 	miner          *miner.Miner
 }
@@ -58,15 +58,18 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 	serviceContext := ctx.Value("ServiceContext").(ServiceContext)
 
 	// Initialize blockchain DB.
-	chainDBPath := filepath.Join(serviceContext.DataDir, BlockChainDir)
-	log.Info("NewSeeleService BlockChain datadir is %s", chainDBPath)
-	s.chainDB, err = leveldb.NewLevelDB(chainDBPath)
-	if err != nil {
-		log.Error("NewSeeleService Create BlockChain err. %s", err)
-		return nil, err
+	// TODO: add numOfShard from the input 
+	for i := 0; i <= numOfShard; i++ {
+		shardNumString = strconv.Itoa(i)
+		chainDBPath := filepath.Join(serviceContext.DataDir, BlockChainDir,shardNumString)
+		log.Info("NewSeeleService BlockChain datadir is %s", chainDBPath)	
+		s.chainDB[i],err = leveldb.NewLevelDB(chainDBPath)
+		if err != nil {
+			log.Error("NewSeeleService Create BlockChain err. %s", err)
+			return nil, err
+		}
+		leveldb.StartMetrics(s.chainDB[i], "chaindb"+shardNumString, log)
 	}
-	leveldb.StartMetrics(s.chainDB, "chaindb", log)
-
 	// Initialize account state info DB.
 	accountStateDBPath := filepath.Join(serviceContext.DataDir, AccountStateDir)
 	log.Info("NewSeeleService account state datadir is %s", accountStateDBPath)
