@@ -113,6 +113,8 @@ func (miner *Miner) SetCoinbase(coinbase common.Address) {
 
 // Start is used to start the miner
 func (miner *Miner) Start() error {
+	var miningKeyHashint big.Int
+
 	if atomic.LoadInt32(&miner.mining) == 1 {
 		miner.log.Info("Miner is running")
 		return ErrMinerIsRunning
@@ -132,7 +134,19 @@ func (miner *Miner) Start() error {
 	miner.log.Info("miner start with %d threads", miner.threads)
 	miner.stopChan = make(chan struct{})
 
-	if err := miner.prepareNewBlock(); err != nil { // try to prepare the first block
+	// try to get a random key from previous transactions and 
+	// determine which shard the miner will work on
+	// TODO create miner.getMiningKey and getShardByMiningKey 	
+	// miningKeyHash, err:= miner.getMiningKey()
+	// if err != nil {
+	//	miner.log.Info("Failed to get the mining key")
+	//	return nil
+	//}
+	//miningKeyHashint.SetBytes(miningKeyHash.Bytes())
+	//shard := getShardByMiningKey(miningKeyHashint)
+
+	// TODO create miner.NewMiningLoop()
+	if err := miner.NewMiningLoop(); err != nil { // try to prepare the first block
 		miner.log.Warn(err.Error())
 		atomic.StoreInt32(&miner.mining, 0)
 
