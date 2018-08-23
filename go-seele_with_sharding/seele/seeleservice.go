@@ -28,8 +28,8 @@ type SeeleService struct {
 	seeleProtocol *SeeleProtocol
 	log           *log.SeeleLog
 
-	txPool         *core.TransactionPool
-	chain          *core.Blockchain
+	txPool         []*core.TransactionPool
+	chain          []*core.Blockchain
 	chainDB        []database.Database // database used to store blocks.
 	accountStateDB database.Database // database used to store account state info.
 	miner          *miner.Miner
@@ -59,7 +59,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 
 	// Initialize blockchain DB.
 	// TODO: add numOfShard from the input 
-	for i := 0; i <= numOfShard; i++ {
+	for i := 0; i < numOfShard; i++ {
 		shardNumString = strconv.Itoa(i)
 		chainDBPath := filepath.Join(serviceContext.DataDir, BlockChainDir,shardNumString)
 		log.Info("NewSeeleService BlockChain datadir is %s", chainDBPath)	
@@ -75,43 +75,57 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 	log.Info("NewSeeleService account state datadir is %s", accountStateDBPath)
 	s.accountStateDB, err = leveldb.NewLevelDB(accountStateDBPath)
 	if err != nil {
-		s.chainDB.Close()
+		for i:=0; i < numOfShard; i++ {
+			s.chainDB[i].Close()
+		}
 		log.Error("NewSeeleService Create BlockChain err: failed to create account state DB, %s", err)
 		return nil, err
 	}
 
 	// initialize and validate genesis
-	bcStore := store.NewCachedStore(store.NewBlockchainDatabase(s.chainDB))
-	genesis := core.GetGenesis(conf.SeeleConfig.GenesisConfig)
+	// TODO add different genesis for different shard
+	for i:=0; i < numOfShard; i++ {
+		bcStore := store.NewCachedStore(store.NewBlockchainDatabase(s.chainDB[i]))
+		genesis := core.GetGenesis(conf.SeeleConfig.GenesisConfig)
 
-	err = genesis.InitializeAndValidate(bcStore, s.accountStateDB)
-	if err != nil {
-		s.chainDB.Close()
-		s.accountStateDB.Close()
-		log.Error("NewSeeleService genesis.Initialize err. %s", err)
-		return nil, err
-	}
+		err = genesis.InitializeAndValidate(bcStore, s.accountStateDB)
+		if err != nil {
+			for i:=0; i < numOfShard; i++ {
+				s.chainDB[i].Close()
+			}
+			s.accountStateDB.Close()
+			log.Error("NewSeeleService genesis.Initialize err. %s", err)
+			return nil, err
+		}
+	
+		shardNumString = strconv.Itoa(i)
+		recoveryPointFile := filepath.Join(serviceContext.DataDir, BlockChainRecoveryPointFile,shardNumString)
+		s.chain[i], err = core.NewBlockchain(bcStore, s.accountStateDB, recoveryPointFile)
+		if err != nil {
+			for i:=0; i < numOfShard; i++ {
+				s.chainDB[i].Close()
+			}
+			s.accountStateDB.Close()
+			log.Error("failed to init chain in NewSeeleService. %s", err)
+			return nil, err
+		}
 
-	recoveryPointFile := filepath.Join(serviceContext.DataDir, BlockChainRecoveryPointFile)
-	s.chain, err = core.NewBlockchain(bcStore, s.accountStateDB, recoveryPointFile)
-	if err != nil {
-		s.chainDB.Close()
-		s.accountStateDB.Close()
-		log.Error("failed to init chain in NewSeeleService. %s", err)
-		return nil, err
-	}
-
-	s.txPool, err = core.NewTransactionPool(conf.SeeleConfig.TxConf, s.chain)
-	if err != nil {
-		s.chainDB.Close()
-		s.accountStateDB.Close()
-		log.Error("failed to create transaction pool in NewSeeleService, %s", err)
-		return nil, err
+		s.txPool[i], err = core.NewTransactionPool(conf.SeeleConfig.TxConf, s.chain[i])
+		if err != nil {
+			for i:=0; i < numOfShard; i++ {
+				s.chainDB[i].Close()
+			}
+			s.accountStateDB.Close()
+			log.Error("failed to create transaction pool in NewSeeleService, %s", err)
+			return nil, err
+		}
 	}
 
 	s.seeleProtocol, err = NewSeeleProtocol(s, log)
 	if err != nil {
-		s.chainDB.Close()
+		for i:=0; i < numOfShard; i++ {
+			s.chainDB[i].Close()
+		}
 		s.accountStateDB.Close()
 		log.Error("failed to create seeleProtocol in NewSeeleService, %s", err)
 		return nil, err
