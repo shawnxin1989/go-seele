@@ -68,7 +68,8 @@ func GetGenesis(info GenesisInfo) *Genesis {
 	}
 
 	extraData := genesisExtraData{info.ShardNumber}
-
+	
+	// TODO: StateHash may not be useful in the future
 	return &Genesis{
 		header: &types.BlockHeader{
 			PreviousBlockHash: common.EmptyHash,
