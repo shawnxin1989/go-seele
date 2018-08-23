@@ -98,7 +98,7 @@ type BlocksMsgBody struct {
 }
 
 // NewDownloader create Downloader
-func NewDownloader(chain *core.Blockchain) *Downloader {
+func NewDownloader(chain []*core.Blockchain) *Downloader {
 	d := &Downloader{
 		peers:      make(map[string]*peerConn),
 		chain:      chain,

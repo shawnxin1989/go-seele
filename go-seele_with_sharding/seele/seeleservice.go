@@ -40,8 +40,8 @@ type ServiceContext struct {
 	DataDir string
 }
 
-func (s *SeeleService) TxPool() *core.TransactionPool { return s.txPool }
-func (s *SeeleService) BlockChain() *core.Blockchain  { return s.chain }
+func (s *SeeleService) TxPool() []*core.TransactionPool { return s.txPool }
+func (s *SeeleService) BlockChain() []*core.Blockchain  { return s.chain }
 func (s *SeeleService) NetVersion() uint64            { return s.networkID }
 func (s *SeeleService) Miner() *miner.Miner           { return s.miner }
 func (s *SeeleService) Downloader() *downloader.Downloader {
@@ -49,7 +49,7 @@ func (s *SeeleService) Downloader() *downloader.Downloader {
 }
 
 // NewSeeleService create SeeleService
-// TODO: add stopAllChainDB function
+// TODO: add stopAllChainDB function, use go routines for all the shards
 func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) (s *SeeleService, err error) {
 	s = &SeeleService{
 		log:       log,
@@ -100,7 +100,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 		}
 	
 		shardNumString = strconv.Itoa(i)
-		recoveryPointFile := filepath.Join(serviceContext.DataDir, BlockChainRecoveryPointFile,shardNumString)
+		recoveryPointFile := filepath.Join(serviceContext.DataDir, BlockChainRecoveryPointFile, shardNumString)
 		s.chain[i], err = core.NewBlockchain(bcStore, s.accountStateDB, recoveryPointFile)
 		if err != nil {
 			for i := 0; i < numOfShard; i++ {
