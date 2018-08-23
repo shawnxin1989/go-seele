@@ -98,9 +98,9 @@ func (n *Node) Start() error {
 	}
 
 	// 2. Check configurations
-	if err := n.checkConfig(); err != nil {
-		return err
-	}
+	//if err := n.checkConfig(); err != nil {
+	//	return err
+	//}
 
 	// 3. Start p2p server
 	p2pServer, err := n.startP2PServer()
@@ -164,7 +164,7 @@ func (n *Node) startP2PServer() (*p2p.Server, error) {
 	}
 
 	p2pServer := p2p.NewServer(n.config.SeeleConfig.GenesisConfig, n.config.P2PConfig, protocols)
-	if err := p2pServer.Start(n.config.BasicConfig.DataDir, n.config.SeeleConfig.GenesisConfig.ShardNumber); err != nil {
+	if err := p2pServer.Start(n.config.BasicConfig.DataDir); err != nil {
 		return nil, ErrServiceStartFailed
 	}
 
