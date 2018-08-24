@@ -113,7 +113,6 @@ func (miner *Miner) SetCoinbase(coinbase common.Address) {
 
 // Start is used to start the miner
 func (miner *Miner) Start() error {
-	var miningKeyHashint big.Int
 
 	if atomic.LoadInt32(&miner.mining) == 1 {
 		miner.log.Info("Miner is running")
@@ -132,21 +131,10 @@ func (miner *Miner) Start() error {
 	}
 
 	miner.log.Info("miner start with %d threads", miner.threads)
-	miner.stopChan = make(chan struct{})
-
-	// try to get a random key from previous transactions and 
-	// determine which shard the miner will work on
-	// TODO create miner.getMiningKey and getShardByMiningKey 	
-	// miningKeyHash, err:= miner.getMiningKey()
-	// if err != nil {
-	//	miner.log.Info("Failed to get the mining key")
-	//	return nil
-	//}
-	//miningKeyHashint.SetBytes(miningKeyHash.Bytes())
-	//shard := getShardByMiningKey(miningKeyHashint)
+	miner.stopChan = make(chan struct{})	
 
 	// TODO create miner.NewMiningLoop()
-	if err := miner.NewMiningLoop(); err != nil { // try to prepare the first block
+	if err := miner.NewMiningLoop(); err != nil { // try to start the mining loop
 		miner.log.Warn(err.Error())
 		atomic.StoreInt32(&miner.mining, 0)
 
@@ -374,4 +362,26 @@ func (miner *Miner) commitTask(task *Task) {
 // Hashrate returns the rate of the POW search invocations per second in the last minute.
 func (miner *Miner) Hashrate() float64 {
 	return miner.hashrate.Rate1()
+}
+
+func (miner *Miner) NewMiningLoop() error {
+	var miningKeyHashint big.Int
+
+	// try to get a random key from previous transactions and 
+	// determine which shard the miner will work on
+	// TODO: create miner.getMiningKey and getShardByMiningKey 	
+	miningKeyHash, err:= miner.getMiningKey()
+	if err != nil {
+		miner.log.Info("Failed to get the mining key")
+		return err
+	}
+	miningKeyHashint.SetBytes(miningKeyHash.Bytes())
+	shard := getShardByMiningKey(miningKeyHashint)
+
+	// try to prepare the new block on a certain shard
+	if err := miner.prepareNewBlock(shard); err != nil {
+		return err
+	}
+	
+	return nil
 }
