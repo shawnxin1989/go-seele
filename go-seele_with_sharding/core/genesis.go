@@ -68,7 +68,7 @@ func GetGenesis(info GenesisInfo) *Genesis {
 	}
 
 	extraData := genesisExtraData{info.ShardNumber}
-	
+
 	// TODO: StateHash may not be useful in the future
 	return &Genesis{
 		header: &types.BlockHeader{
@@ -110,14 +110,14 @@ func (genesis *Genesis) InitializeAndValidate(bcStore store.BlockchainStore, acc
 		return fmt.Errorf("failed to get genesis block. %s", err)
 	}
 
-	data, err := getGenesisExtraData(storedGenesis)
-	if err != nil {
-		return fmt.Errorf("failed to get genesis extra data. %s", err)
-	}
+	//data, err := getGenesisExtraData(storedGenesis)
+	//if err != nil {
+	//	return fmt.Errorf("failed to get genesis extra data. %s", err)
+	//}
 
-	if data.ShardNumber != genesis.info.ShardNumber {
-		return errors.New("specific shard number does not match with the shard number in genesis info")
-	}
+	//if data.ShardNumber != genesis.info.ShardNumber {
+	//	return errors.New("specific shard number does not match with the shard number in genesis info")
+	//}
 
 	headerHash := genesis.header.Hash()
 	if !headerHash.Equal(storedGenesisHash) {
