@@ -67,7 +67,7 @@ func GetGenesis(info GenesisInfo) *Genesis {
 		panic(err)
 	}
 
-	extraData := genesisExtraData{info.ShardNumber}
+	//extraData := genesisExtraData{info.ShardNumber}
 
 	// TODO: StateHash may not be useful in the future
 	return &Genesis{
@@ -80,7 +80,7 @@ func GetGenesis(info GenesisInfo) *Genesis {
 			Height:            genesisBlockHeight,
 			CreateTimestamp:   big.NewInt(0),
 			Nonce:             1,
-			ExtraData:         common.SerializePanic(extraData),
+			//ExtraData:         common.SerializePanic(extraData),
 		},
 		info: info,
 	}
