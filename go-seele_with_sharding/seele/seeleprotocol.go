@@ -251,9 +251,7 @@ func (p *SeeleProtocol) handleNewTx(e event.Event) {
 
 	tx := e.(*types.Transaction)
 
-	// find shardId by tx from address.
-	shardId := tx.Data.From.Shard()
-	p.peerSet.ForEach(shardId, func(peer *peer) bool {
+	p.peerSet.ForEach(func(peer *peer) bool {
 		if err := peer.sendTransactionHash(tx.Hash); err != nil {
 			p.log.Warn("failed to send transaction to %s, %s", peer.Node.GetUDPAddr(), err)
 		}
