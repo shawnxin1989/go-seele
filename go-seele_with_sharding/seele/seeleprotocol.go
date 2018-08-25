@@ -185,11 +185,12 @@ func (sp *SeeleProtocol) broadcastChainHead() {
 		return
 	}
 
+	// TODO: add shard info
 	status := &chainHeadStatus{
 		TD:           localTD,
 		CurrentBlock: head,
 	}
-	sp.peerSet.ForEach(common.LocalShardNumber, func(peer *peer) bool {
+	sp.peerSet.ForEach(func(peer *peer) bool {
 		err := peer.sendHeadStatus(status)
 		if err != nil {
 			sp.log.Warn("failed to send chain head info %s", err)
@@ -262,7 +263,7 @@ func (p *SeeleProtocol) handleNewTx(e event.Event) {
 func (p *SeeleProtocol) handleNewMinedBlock(e event.Event) {
 	block := e.(*types.Block)
 
-	p.peerSet.ForEach(common.LocalShardNumber, func(peer *peer) bool {
+	p.peerSet.ForEach(func(peer *peer) bool {
 		err := peer.SendBlockHash(block.HeaderHash)
 		if err != nil {
 			p.log.Warn("failed to send mined block hash %s", err.Error())
