@@ -81,7 +81,7 @@ type reply struct {
 	data interface{}
 }
 
-func newUDP(id common.Address, addr *net.UDPAddr, shard uint) *udp {
+func newUDP(id common.Address, addr *net.UDPAddr) *udp {
 	log := log.GetLogger("discovery")
 	conn, err := getUDPConn(addr)
 	if err != nil {
@@ -90,8 +90,8 @@ func newUDP(id common.Address, addr *net.UDPAddr, shard uint) *udp {
 
 	transport := &udp{
 		conn:      conn,
-		table:     newTable(id, addr, shard, log),
-		self:      NewNodeWithAddr(id, addr, shard),
+		table:     newTable(id, addr, log),
+		self:      NewNodeWithAddr(id, addr),
 		localAddr: addr,
 
 		db: NewDatabase(log),
