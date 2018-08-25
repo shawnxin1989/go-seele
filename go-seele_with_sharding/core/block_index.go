@@ -16,15 +16,13 @@ import (
 
 // BlockIndex is the index of the block chain
 type BlockIndex struct {
-	state           *state.Statedb
 	currentBlock    *types.Block
 	totalDifficulty *big.Int
 }
 
 // NewBlockIndex constructs and returns a BlockIndex instance
-func NewBlockIndex(state *state.Statedb, block *types.Block, td *big.Int) *BlockIndex {
+func NewBlockIndex(block *types.Block, td *big.Int) *BlockIndex {
 	return &BlockIndex{
-		state:           state,
 		currentBlock:    block,
 		totalDifficulty: td,
 	}
@@ -69,11 +67,6 @@ func (bf *BlockLeaves) RemoveByHash(hash common.Hash) {
 // GetBestBlock gets the current block of the best block index in the block leaves
 func (bf *BlockLeaves) GetBestBlock() *types.Block {
 	return bf.GetBestBlockIndex().currentBlock
-}
-
-// GetBestStateDB gets the state DB of the best block index in the block leaves
-func (bf *BlockLeaves) GetBestStateDB() *state.Statedb {
-	return bf.GetBestBlockIndex().state
 }
 
 // GetBlockIndexByHash gets the block index with the specified hash in the block leaves

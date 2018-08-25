@@ -175,14 +175,7 @@ func NewBlockchain(bcStore store.BlockchainStore, accountStateDB database.Databa
 		return nil, err
 	}
 
-	// Get the state DB of the current block
-	currentState, err := state.NewStatedb(currentBlock.Header.StateHash, accountStateDB)
-	if err != nil {
-		bc.log.Error("Failed to create state DB, state hash = %v, error = %v", currentBlock.Header.StateHash, err.Error())
-		return nil, err
-	}
-
-	blockIndex := NewBlockIndex(currentState, currentBlock, td)
+	blockIndex := NewBlockIndex(currentBlock, td)
 	bc.blockLeaves = NewBlockLeaves()
 	bc.blockLeaves.Add(blockIndex)
 
