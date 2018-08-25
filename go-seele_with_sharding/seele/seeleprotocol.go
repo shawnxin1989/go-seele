@@ -67,8 +67,8 @@ type SeeleProtocol struct {
 
 	networkID  uint64
 	downloader *downloader.Downloader
-	txPool     *core.TransactionPool
-	chain      *core.Blockchain
+	txPool     []*core.TransactionPool
+	chain      []*core.Blockchain
 
 	wg     sync.WaitGroup
 	quitCh chan struct{}

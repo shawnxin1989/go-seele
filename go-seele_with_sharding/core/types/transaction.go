@@ -146,7 +146,7 @@ func newTx(from common.Address, to common.Address, amount *big.Int, fee *big.Int
 }
 
 // ValidateWithoutState validates state independent fields in tx.
-func (tx Transaction) ValidateWithoutState(signNeeded bool, shardNeeded bool) error {
+func (tx Transaction) ValidateWithoutState(signNeeded bool) error {
 	// validate amount
 	if tx.Data.Amount == nil {
 		return ErrAmountNil
@@ -172,21 +172,6 @@ func (tx Transaction) ValidateWithoutState(signNeeded bool, shardNeeded bool) er
 
 	if (tx.Data.To.IsEmpty() || tx.Data.To.Type() == common.AddressTypeContract) && len(tx.Data.Payload) == 0 {
 		return ErrPayloadEmpty
-	}
-
-	// validate shard of from/to address
-	if shardNeeded {
-		if common.IsShardEnabled() {
-			if fromShardNum := tx.Data.From.Shard(); fromShardNum != common.LocalShardNumber {
-				return fmt.Errorf("invalid from address, shard number is [%v], but coinbase shard number is [%v]", fromShardNum, common.LocalShardNumber)
-			}
-		}
-
-		if !tx.Data.To.IsEmpty() && common.IsShardEnabled() {
-			if toShardNum := tx.Data.To.Shard(); toShardNum != common.LocalShardNumber {
-				return fmt.Errorf("invalid to address, shard number is [%v], but coinbase shard number is [%v]", toShardNum, common.LocalShardNumber)
-			}
-		}
 	}
 
 	// vaildate signature
@@ -256,7 +241,7 @@ func (tx *Transaction) Sign(privKey *ecdsa.PrivateKey) {
 
 // Validate validates all fields in tx.
 func (tx *Transaction) Validate(statedb stateDB) error {
-	if err := tx.ValidateWithoutState(true, true); err != nil {
+	if err := tx.ValidateWithoutState(true); err != nil {
 		return err
 	}
 
