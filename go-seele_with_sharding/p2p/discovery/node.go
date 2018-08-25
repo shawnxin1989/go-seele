@@ -38,18 +38,17 @@ type Node struct {
 }
 
 // NewNode new node with its value
-func NewNode(id common.Address, ip net.IP, port int, shard uint) *Node {
+func NewNode(id common.Address, ip net.IP, port int) *Node {
 	return &Node{
 		ID:      id,
 		IP:      ip,
 		UDPPort: port,
-		Shard:   shard,
 	}
 }
 
 // NewNodeWithAddr new node with id and network address
-func NewNodeWithAddr(id common.Address, addr *net.UDPAddr, shard uint) *Node {
-	return NewNode(id, addr.IP, addr.Port, shard)
+func NewNodeWithAddr(id common.Address, addr *net.UDPAddr) *Node {
+	return NewNode(id, addr.IP, addr.Port)
 }
 
 func NewNodeFromIP(id string) (*Node, error) {

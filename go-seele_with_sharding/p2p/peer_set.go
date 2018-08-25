@@ -19,14 +19,10 @@ type peerSet struct {
 }
 
 func NewPeerSet() *peerSet {
-	peers := make(map[uint]map[common.Address]*Peer)
-	for i := 1; i < common.ShardCount+1; i++ {
-		peers[uint(i)] = make(map[common.Address]*Peer)
-	}
+	peers := make(map[uint]map[common.Address]*Peer)	
 
 	return &peerSet{
 		peerMap:      make(map[common.Address]*Peer),
-		shardPeerMap: peers,
 		lock:         sync.RWMutex{},
 	}
 }
