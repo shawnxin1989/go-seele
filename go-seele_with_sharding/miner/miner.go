@@ -216,6 +216,7 @@ func (miner *Miner) downloaderEventCallback(e event.Event) {
 }
 
 // newTxCallback handles the new tx event
+// TODO: add shard info 
 func (miner *Miner) newTxCallback(e event.Event) {
 	if common.PrintExplosionLog {
 		miner.log.Debug("got the new tx event")
@@ -223,7 +224,7 @@ func (miner *Miner) newTxCallback(e event.Event) {
 
 	// if not mining, start mining
 	if atomic.LoadInt32(&miner.stopped) == 0 && atomic.LoadInt32(&miner.canStart) == 1 && atomic.CompareAndSwapInt32(&miner.mining, 0, 1) {
-		if err := miner.prepareNewBlock(); err != nil {
+		if err := miner.prepareNewBlock(shard); err != nil {
 			miner.log.Warn(err.Error())
 			atomic.StoreInt32(&miner.mining, 0)
 		}
@@ -241,7 +242,8 @@ out:
 					break
 				}
 
-				miner.log.Info("found a new mined block, block height:%d, hash:%s", result.block.Header.Height, result.block.HeaderHash.ToHex())
+				//TODO: add shard info
+				//miner.log.Info("found a new mined block, block height:%d, hash:%s", result.block.Header.Height, result.block.HeaderHash.ToHex())
 				ret := miner.saveBlock(result)
 				if ret != nil {
 					miner.log.Error("failed to save the block, for %s", ret.Error())
@@ -382,6 +384,6 @@ func (miner *Miner) NewMiningLoop() error {
 	if err := miner.prepareNewBlock(shard); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
