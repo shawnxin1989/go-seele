@@ -352,6 +352,7 @@ func (u *udp) discovery() {
 		u.log.Debug("query node with id: %s", id.ToHex())
 		sendFindNodeRequest(u, nodes, *id)
 
+		// TODO: delete the shard info
 		concurrentCount := 0
 		for i := 1; i < common.ShardCount+1; i++ {
 			shardBucket := u.table.shardBuckets[i]
