@@ -45,8 +45,8 @@ type peer struct {
 	peerID    common.Address // id of the peer
 	peerStrID string
 	version   uint // Seele protocol version negotiated
-	head      common.Hash
-	td        *big.Int // total difficulty
+	head      []common.Hash
+	td        []*big.Int // total difficulty
 	lock      sync.RWMutex
 
 	rw p2p.MsgReadWriter // the read write method for this peer
