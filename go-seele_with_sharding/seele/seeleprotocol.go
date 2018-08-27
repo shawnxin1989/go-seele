@@ -141,7 +141,7 @@ func (sp *SeeleProtocol) syncer() {
 }
 
 func (sp *SeeleProtocol) synchronise(bestPeers []*bestPeerForEachShard) {
-	if p == nil {
+	if bestPeers == nil {
 		return
 	}
 
@@ -149,31 +149,34 @@ func (sp *SeeleProtocol) synchronise(bestPeers []*bestPeerForEachShard) {
 		sp.log.Debug("sp.synchronise called.")
 	}
 
-	block := sp.chain.CurrentBlock()
-	localTD, err := sp.chain.GetStore().GetBlockTotalDifficulty(block.HeaderHash)
-	if err != nil {
-		sp.log.Error("sp.synchronise GetBlockTotalDifficulty err.[%s]", err)
-		return
-	}
-	pHead, pTd := p.Head()
-
-	// if total difficulty is not smaller than remote peer td, then do not need synchronise.
-	if localTD.Cmp(pTd) >= 0 {
-		return
-	}
-
-	err = sp.downloader.Synchronise(p.peerStrID, pHead, pTd, localTD)
-	if err != nil {
-		if err == downloader.ErrIsSynchronising {
-			sp.log.Info("exit synchronise as it is already running.")
-		} else {
-			sp.log.Error("synchronise err. %s", err)
+	for i, bp := range bestPeers {
+		block := sp.chain[i].CurrentBlock()
+		localTD, err := sp.chain[i].GetStore().GetBlockTotalDifficulty(block.HeaderHash)
+		if err != nil {
+			sp.log.Error("sp.synchronise GetBlockTotalDifficulty err.[%s]", err)
+			return
 		}
-		return
-	}
+		pHead, pTd := bp.bestPeer.HeadByShard(bp.shard)
 
-	//broadcast chain head
-	sp.broadcastChainHead()
+		// if total difficulty is not smaller than remote peer td, then do not need synchronise.
+		if localTD.Cmp(pTd) >= 0 {
+			return
+		}
+
+		// TODO: modify the interface
+		err = sp.downloader.Synchronise(bp.bestPeer.peerStrID, pHead, pTd, localTD)
+		if err != nil {
+			if err == downloader.ErrIsSynchronising {
+				sp.log.Info("exit synchronise as it is already running.")
+			} else {
+				sp.log.Error("synchronise err. %s", err)
+			}
+			return
+		}
+
+		//broadcast chain head
+		sp.broadcastChainHead()
+	}
 }
 
 func (sp *SeeleProtocol) broadcastChainHead() {
