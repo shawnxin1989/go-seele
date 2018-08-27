@@ -140,6 +140,7 @@ func (d *Downloader) getSyncInfo(info *SyncInfo) {
 }
 
 // Synchronise try to sync with remote peer.
+// TODO: change the d.doSynchronise interface
 func (d *Downloader) Synchronise(id string, head common.Hash, td *big.Int, localTD *big.Int) error {
 	// Make sure only one routine can pass at once
 	d.lock.Lock()
