@@ -131,9 +131,9 @@ func (sp *SeeleProtocol) syncer() {
 	for {
 		select {
 		case <-sp.syncCh:
-			go sp.synchronise(sp.peerSet.bestPeer(common.LocalShardNumber))
+			go sp.synchronise(sp.peerSet.bestPeer())
 		case <-forceSync.C:
-			go sp.synchronise(sp.peerSet.bestPeer(common.LocalShardNumber))
+			go sp.synchronise(sp.peerSet.bestPeer())
 		case <-sp.quitCh:
 			return
 		}
