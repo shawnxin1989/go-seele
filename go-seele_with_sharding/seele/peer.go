@@ -174,6 +174,14 @@ func (p *peer) Head() (hash common.Hash, td *big.Int) {
 	return hash, new(big.Int).Set(p.td)
 }
 
+func (p *peer) HeadByShard(shard uint) (hash common.Hash, td *big.Int) {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+
+	copy(hash[:], p.head[shard][:])
+	return hash, new(big.Int).Set(p.td[shard])
+}
+
 // SetHead updates the head hash and total difficulty of the peer.
 func (p *peer) SetHead(hash common.Hash, td *big.Int) {
 	p.lock.Lock()

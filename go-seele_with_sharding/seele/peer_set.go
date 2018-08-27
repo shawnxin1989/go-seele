@@ -39,10 +39,10 @@ func (p *peerSet) bestPeer() []*bestPeerForEachShard {
 
 	// traverse all the peers to get the bestPeer for each shard
 	p.ForEach(func(p *peer) bool {
-		tds := p.Head()
 		for i := 0; i < numOfShard; i++ {
-			if bestPeers[i] == nil || tds[i].Cmp(bestPeers[i].bestTd) > 0 {
-				bestPeers[i].bestPeer, bestPeers[i].bestTd = p, tds[i]
+			td := p.HeadByShard(i)   
+			if bestPeers[i] == nil || td.Cmp(bestPeers[i].bestTd) > 0 {
+				bestPeers[i].bestPeer, bestPeers[i].bestTd = p, td
 				bestPeers[i].shard = i
 			}
 		}
