@@ -140,7 +140,7 @@ func (sp *SeeleProtocol) syncer() {
 	}
 }
 
-func (sp *SeeleProtocol) synchronise(p *peer) {
+func (sp *SeeleProtocol) synchronise(bestPeers []*bestPeerForEachShard) {
 	if p == nil {
 		return
 	}
