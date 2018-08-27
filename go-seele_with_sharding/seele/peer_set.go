@@ -26,13 +26,13 @@ func newPeerSet() *peerSet {
 	return ps
 }
 
-func (p *peerSet) bestPeer(shard uint) *peer {
+func (p *peerSet) bestPeer() *peer {
 	var (
 		bestPeer *peer
 		bestTd   *big.Int
 	)
 
-	p.ForEach(shard, func(p *peer) bool {
+	p.ForEach(func(p *peer) bool {
 		if _, td := p.Head(); bestPeer == nil || td.Cmp(bestTd) > 0 {
 			bestPeer, bestTd = p, td
 		}
