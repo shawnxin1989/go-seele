@@ -193,13 +193,14 @@ func (p *peer) SetHead(hash common.Hash, td *big.Int) {
 
 // RequestHeadersByHashOrNumber fetches a batch of blocks' headers corresponding to the
 // specified header query, based on the hash of an origin block.
-func (p *peer) RequestHeadersByHashOrNumber(magic uint32, origin common.Hash, num uint64, amount int, reverse bool) error {
+func (p *peer) RequestHeadersByHashOrNumber(magic uint32, origin common.Hash, shard uint, num uint64, amount int, reverse bool) error {
 	query := &blockHeadersQuery{
 		Magic:   magic,
 		Hash:    origin,
 		Number:  num,
 		Amount:  uint64(amount),
 		Reverse: reverse,
+		Shard:   shard,
 	}
 
 	buff := common.SerializePanic(query)

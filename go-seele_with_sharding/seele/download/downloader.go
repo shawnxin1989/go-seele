@@ -225,8 +225,8 @@ func (d *Downloader) doSynchronise(conn *peerConn, head common.Hash, td *big.Int
 }
 
 // fetchHeight gets the latest head of peer
-func (d *Downloader) fetchHeight(conn *peerConn) (*types.BlockHeader, error) {
-	head, _ := conn.peer.Head()
+func (d *Downloader) fetchHeight(conn *peerConn, shard uint) (*types.BlockHeader, error) {
+	head, _ := conn.peer.HeadByShard()
 
 	magic := rand2.Uint32()
 	go conn.peer.RequestHeadersByHashOrNumber(magic, head, 0, 1, false)
