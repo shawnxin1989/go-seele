@@ -141,7 +141,7 @@ func (d *Downloader) getSyncInfo(info *SyncInfo) {
 
 // Synchronise try to sync with remote peer.
 // TODO: change the d.doSynchronise interface
-func (d *Downloader) Synchronise(id string, head common.Hash, td *big.Int, localTD *big.Int) error {
+func (d *Downloader) Synchronise(id string, shard uint, head common.Hash, td *big.Int, localTD *big.Int) error {
 	// Make sure only one routine can pass at once
 	d.lock.Lock()
 	if d.syncStatus != statusNone {
@@ -160,7 +160,7 @@ func (d *Downloader) Synchronise(id string, head common.Hash, td *big.Int, local
 	}
 	d.lock.Unlock()
 
-	err := d.doSynchronise(p, head, td, localTD)
+	err := d.doSynchronise(p, shard, head, td, localTD)
 	d.lock.Lock()
 	d.syncStatus = statusNone
 	d.sessionWG.Wait()
@@ -169,7 +169,7 @@ func (d *Downloader) Synchronise(id string, head common.Hash, td *big.Int, local
 	return err
 }
 
-func (d *Downloader) doSynchronise(conn *peerConn, head common.Hash, td *big.Int, localTD *big.Int) (err error) {
+func (d *Downloader) doSynchronise(conn *peerConn, shard uint, head common.Hash, td *big.Int, localTD *big.Int) (err error) {
 	d.log.Debug("Downloader.doSynchronise start")
 	event.BlockDownloaderEventManager.Fire(event.DownloaderStartEvent)
 	defer func() {
@@ -183,13 +183,13 @@ func (d *Downloader) doSynchronise(conn *peerConn, head common.Hash, td *big.Int
 	}()
 
 	rand2.Seed(time.Now().UnixNano())
-	latest, err := d.fetchHeight(conn)
+	latest, err := d.fetchHeight(conn, shard)
 	if err != nil {
 		return err
 	}
 	height := latest.Height
 
-	ancestor, err := d.findCommonAncestorHeight(conn, height)
+	ancestor, err := d.findCommonAncestorHeight(conn, shard, height)
 	if err != nil {
 		return err
 	}
@@ -226,10 +226,10 @@ func (d *Downloader) doSynchronise(conn *peerConn, head common.Hash, td *big.Int
 
 // fetchHeight gets the latest head of peer
 func (d *Downloader) fetchHeight(conn *peerConn, shard uint) (*types.BlockHeader, error) {
-	head, _ := conn.peer.HeadByShard()
+	head, _ := conn.peer.HeadByShard(shard)
 
 	magic := rand2.Uint32()
-	go conn.peer.RequestHeadersByHashOrNumber(magic, head, 0, 1, false)
+	go conn.peer.RequestHeadersByHashOrNumber(magic, head, shard, 0, 1, false)
 	msg, err := conn.waitMsg(magic, BlockHeadersMsg, d.cancelCh)
 	if err != nil {
 		return nil, err
@@ -246,9 +246,9 @@ func (d *Downloader) fetchHeight(conn *peerConn, shard uint) (*types.BlockHeader
 }
 
 // findCommonAncestorHeight finds the common ancestor height
-func (d *Downloader) findCommonAncestorHeight(conn *peerConn, height uint64) (uint64, error) {
+func (d *Downloader) findCommonAncestorHeight(conn *peerConn, shard uint, height uint64) (uint64, error) {
 	// Get the top height
-	block := d.chain.CurrentBlock()
+	block := d.chain[shard].CurrentBlock()
 	localHeight := block.Header.Height
 	var top uint64
 	if localHeight <= height {
@@ -285,7 +285,7 @@ func (d *Downloader) findCommonAncestorHeight(conn *peerConn, height uint64) (ui
 
 		// Get peer block headers
 		magic := rand2.Uint32()
-		go conn.peer.RequestHeadersByHashOrNumber(magic, common.EmptyHash, localTop, fetchCount, true)
+		go conn.peer.RequestHeadersByHashOrNumber(magic, common.EmptyHash, shard, localTop, fetchCount, true)
 		msg, err := conn.waitMsg(magic, BlockHeadersMsg, d.cancelCh)
 		if err != nil {
 			return 0, err

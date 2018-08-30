@@ -164,7 +164,7 @@ func (sp *SeeleProtocol) synchronise(bestPeers []*bestPeerForEachShard) {
 		}
 
 		// TODO: modify the interface
-		err = sp.downloader.Synchronise(bp.bestPeer.peerStrID, pHead, pTd, localTD)
+		err = sp.downloader.Synchronise(bp.bestPeer.peerStrID, bp.shard, pHead, pTd, localTD)
 		if err != nil {
 			if err == downloader.ErrIsSynchronising {
 				sp.log.Info("exit synchronise as it is already running.")
