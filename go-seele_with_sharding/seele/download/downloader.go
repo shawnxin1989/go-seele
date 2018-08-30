@@ -300,7 +300,7 @@ func (d *Downloader) findCommonAncestorHeight(conn *peerConn, shard uint, height
 		// Is ancenstor found
 		for i := 0; i < len(headers); i++ {
 			cmpHeight := headers[i].Height
-			localHash, err := d.chain.GetStore().GetBlockHash(cmpHeight)
+			localHash, err := d.chain[shard].GetStore().GetBlockHash(cmpHeight)
 			if err != nil {
 				return 0, err
 			}
