@@ -61,7 +61,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 	// Initialize blockchain DB.
 	// TODO: add numOfShard from the input 
 	for i := 0; i < numOfShard; i++ {
-		shardNumString = strconv.Itoa(i)
+		shardNumString := strconv.Itoa(i)
 		chainDBPath := filepath.Join(serviceContext.DataDir, BlockChainDir, shardNumString)
 		log.Info("NewSeeleService BlockChain datadir is %s", chainDBPath)	
 		s.chainDB[i],err = leveldb.NewLevelDB(chainDBPath)

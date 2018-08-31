@@ -31,6 +31,9 @@ const (
 
 	// BlockChainRecoveryPointFile is used to store the recovery point info of blockchain.
 	BlockChainRecoveryPointFile = "recoveryPoint.json"
+
+	// number of Shard
+	numOfShard = 10 
 )
 
 // statusData the structure for peers to exchange status
