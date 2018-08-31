@@ -82,6 +82,18 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 		return nil, err
 	}
 
+	// initialize accountStateDB with genesis info
+	statedb, err := core.getStateDB(genesis.info)
+ 	if err != nil {
+ 		return err
+ 	}
+
+ 	batch := s.accountStateDB.NewBatch()
+ 	statedb.Commit(batch)
+ 	if err = batch.Commit(); err != nil {
+ 		return err
+ 	}
+
 	// initialize and validate genesis
 	for i := 0; i < numOfShard; i++ {
 		bcStore := store.NewCachedStore(store.NewBlockchainDatabase(s.chainDB[i]))
