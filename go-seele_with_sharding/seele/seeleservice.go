@@ -109,7 +109,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 			return nil, err
 		}
 	
-		shardNumString = strconv.Itoa(i)
+		shardNumString := strconv.Itoa(i)
 		recoveryPointFile := filepath.Join(serviceContext.DataDir, BlockChainRecoveryPointFile, shardNumString)
 		s.chain[i], err = core.NewBlockchain(bcStore, s.accountStateDB, recoveryPointFile)
 		if err != nil {

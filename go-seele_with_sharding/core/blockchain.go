@@ -109,7 +109,6 @@ type consensusEngine interface {
 // This is a thread safe structure. we must keep all of its parameters are thread safe too.
 type Blockchain struct {
 	bcStore        store.BlockchainStore
-	accountStateDB database.Database
 	engine         consensusEngine
 	genesisBlock   *types.Block
 	lock           sync.RWMutex // lock for update blockchain info. for example write block
@@ -121,10 +120,9 @@ type Blockchain struct {
 }
 
 // NewBlockchain returns an initialized blockchain with the given store and account state DB.
-func NewBlockchain(bcStore store.BlockchainStore, accountStateDB database.Database, recoveryPointFile string) (*Blockchain, error) {
+func NewBlockchain(bcStore store.BlockchainStore, recoveryPointFile string) (*Blockchain, error) {
 	bc := &Blockchain{
 		bcStore:        bcStore,
-		accountStateDB: accountStateDB,
 		engine:         &pow.Engine{},
 		log:            log.GetLogger("blockchain"),
 	}
