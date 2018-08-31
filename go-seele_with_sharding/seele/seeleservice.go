@@ -28,9 +28,9 @@ type SeeleService struct {
 	seeleProtocol *SeeleProtocol
 	log           *log.SeeleLog
 
-	txPool         []*core.TransactionPool
-	chain          []*core.Blockchain
-	chainDB        []database.Database // database used to store blocks.
+	txPool         [numOfShard]*core.TransactionPool
+	chain          [numOfShard]*core.Blockchain
+	chainDB        [numOfShard]database.Database // database used to store blocks.
 	accountStateDB database.Database // database used to store account state info.
 	miner          *miner.Miner
 }
@@ -59,7 +59,6 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 	serviceContext := ctx.Value("ServiceContext").(ServiceContext)
 
 	// Initialize blockchain DB.
-	// TODO: add numOfShard from the input 
 	for i := 0; i < numOfShard; i++ {
 		shardNumString := strconv.Itoa(i)
 		chainDBPath := filepath.Join(serviceContext.DataDir, BlockChainDir, shardNumString)
