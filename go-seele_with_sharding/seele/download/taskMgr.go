@@ -62,9 +62,10 @@ type taskMgr struct {
 	wg         sync.WaitGroup
 	log        *log.SeeleLog
 	startTime  time.Time
+	shardNo      uint
 }
 
-func newTaskMgr(d *Downloader, masterPeer string, from uint64, to uint64) *taskMgr {
+func newTaskMgr(d *Downloader, masterPeer string, shard uint, from uint64, to uint64) *taskMgr {
 	t := &taskMgr{
 		log:              d.log,
 		downloader:       d,
@@ -77,6 +78,7 @@ func newTaskMgr(d *Downloader, masterPeer string, from uint64, to uint64) *taskM
 		peersHeaderMap:   make(map[string]*peerHeadInfo),
 		downloadInfoList: make([]*downloadInfo, 0, to-from+1),
 		quitCh:           make(chan struct{}),
+		shardNo:          shard,
 	}
 	t.wg.Add(1)
 	go t.run()

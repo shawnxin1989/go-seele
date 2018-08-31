@@ -221,12 +221,13 @@ func (p *peer) sendBlockHeaders(magic uint32, headers []*types.BlockHeader) erro
 
 // RequestBlocksByHashOrNumber fetches a batch of blocks corresponding to the
 // specified header query, based on the hash of an origin block.
-func (p *peer) RequestBlocksByHashOrNumber(magic uint32, origin common.Hash, num uint64, amount int) error {
+func (p *peer) RequestBlocksByHashOrNumber(magic uint32, origin common.Hash, shard uint, num uint64, amount int) error {
 	query := &blocksQuery{
 		Magic:  magic,
 		Hash:   origin,
 		Number: num,
 		Amount: uint64(amount),
+		Shard:  shard,
 	}
 	buff := common.SerializePanic(query)
 

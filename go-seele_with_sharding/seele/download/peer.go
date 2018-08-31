@@ -26,9 +26,9 @@ var (
 )
 
 type Peer interface {
-	Head() (common.Hash, *big.Int)
-	RequestHeadersByHashOrNumber(magic uint32, origin common.Hash, num uint64, amount int, reverse bool) error
-	RequestBlocksByHashOrNumber(magic uint32, origin common.Hash, num uint64, amount int) error
+	HeadByShard(shard uint) (common.Hash, *big.Int)
+	RequestHeadersByHashOrNumber(magic uint32, origin common.Hash, shard uint, num uint64, amount int, reverse bool) error
+	RequestBlocksByHashOrNumber(magic uint32, origin common.Hash, shard uint, num uint64, amount int) error
 }
 
 type peerConn struct {

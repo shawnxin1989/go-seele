@@ -194,12 +194,12 @@ func (d *Downloader) doSynchronise(conn *peerConn, shard uint, head common.Hash,
 		return err
 	}
 	d.log.Debug("start task manager from height:%d, target height:%d", ancestor, height)
-	tm := newTaskMgr(d, d.masterPeer, ancestor+1, height)
+	tm := newTaskMgr(d, d.masterPeer, shard, ancestor+1, height)
 	d.tm = tm
 	d.lock.Lock()
 	d.syncStatus = statusFetching
 	for _, pConn := range d.peers {
-		_, peerTD := pConn.peer.Head()
+		_, peerTD := pConn.peer.HeadByShard(shard)
 		if localTD.Cmp(peerTD) >= 0 {
 			continue
 		}
@@ -382,7 +382,7 @@ outLoop:
 
 			d.log.Debug("request header by number. start %d, amount %d", startNo, amount)
 			magic := rand2.Uint32()
-			if err = conn.peer.RequestHeadersByHashOrNumber(magic, common.Hash{}, startNo, amount, false); err != nil {
+			if err = conn.peer.RequestHeadersByHashOrNumber(magic, common.Hash{}, tm.shardNo, startNo, amount, false); err != nil {
 				d.log.Warn("RequestHeadersByHashOrNumber err! %s pid=%s", err, peerID)
 				break
 			}
@@ -415,7 +415,7 @@ outLoop:
 
 			d.log.Debug("request block by number. start %d, amount %d", startNo, amount)
 			magic := rand2.Uint32()
-			if err = conn.peer.RequestBlocksByHashOrNumber(magic, common.Hash{}, startNo, amount); err != nil {
+			if err = conn.peer.RequestBlocksByHashOrNumber(magic, common.Hash{}, tm.shardNo, startNo, amount); err != nil {
 				d.log.Warn("RequestBlocksByHashOrNumber err! %s", err)
 				break
 			}
@@ -473,7 +473,8 @@ func (d *Downloader) processBlocks(headInfos []*downloadInfo) {
 
 	for _, h := range headInfos {
 		d.log.Debug("d.processBlock %d", h.block.Header.Height)
-		if err := d.chain.WriteBlock(h.block); err != nil && err != core.ErrBlockAlreadyExists {
+		shard := h.shard
+		if err := d.chain[shard].WriteBlock(h.block); err != nil && err != core.ErrBlockAlreadyExists {
 			d.log.Error("downloader processBlocks err. %s", err)
 			d.Cancel()
 			break
