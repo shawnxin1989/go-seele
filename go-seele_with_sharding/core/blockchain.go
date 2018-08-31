@@ -117,14 +117,17 @@ type Blockchain struct {
 	log         *log.SeeleLog
 
 	rp *recoveryPoint // used to recover blockchain in case of program crashed when write a block
+
+	Shard        uint   
 }
 
 // NewBlockchain returns an initialized blockchain with the given store and account state DB.
-func NewBlockchain(bcStore store.BlockchainStore, recoveryPointFile string) (*Blockchain, error) {
+func NewBlockchain(bcStore store.BlockchainStore, recoveryPointFile string, shard unit) (*Blockchain, error) {
 	bc := &Blockchain{
 		bcStore:        bcStore,
 		engine:         &pow.Engine{},
 		log:            log.GetLogger("blockchain"),
+		Shard:          shard,
 	}
 
 	var err error

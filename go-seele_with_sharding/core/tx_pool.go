@@ -57,10 +57,11 @@ type TransactionPool struct {
 	lastHeader               common.Hash
 	chainHeaderChangeChannel chan common.Hash
 	log                      *log.SeeleLog
+	Shard                    uint
 }
 
 // NewTransactionPool creates and returns a transaction pool.
-func NewTransactionPool(config TransactionPoolConfig, chain blockchain) (*TransactionPool, error) {
+func NewTransactionPool(config TransactionPoolConfig, chain blockchain, shard uint) (*TransactionPool, error) {
 	header, err := chain.GetStore().GetHeadBlockHash()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get chain header, %s", err)
@@ -75,6 +76,7 @@ func NewTransactionPool(config TransactionPoolConfig, chain blockchain) (*Transa
 		lastHeader:    header,
 		log:           log.GetLogger("txpool"),
 		chainHeaderChangeChannel: make(chan common.Hash, chainHeaderChangeBuffSize),
+		Shard:         shard,
 	}
 
 	event.ChainHeaderChangedEventMananger.AddAsyncListener(pool.chainHeaderChanged)
@@ -92,6 +94,11 @@ func (pool *TransactionPool) chainHeaderChanged(e event.Event) {
 		return
 	}
 
+	// check whether the shard of the pool matches the shard of the event
+	shard := e.(uint)
+	if pool.Shard != shard {
+		return
+	}
 	pool.chainHeaderChangeChannel <- newHeader
 }
 
