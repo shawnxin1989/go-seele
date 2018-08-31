@@ -93,12 +93,12 @@ func (genesis *Genesis) GetShardNumber() uint {
 
 // InitializeAndValidate writes the genesis block in the blockchain store if unavailable.
 // Otherwise, check if the existing genesis block is valid in the blockchain store.
-func (genesis *Genesis) InitializeAndValidate(bcStore store.BlockchainStore, accountStateDB database.Database) error {
+func (genesis *Genesis) InitializeAndValidate(bcStore store.BlockchainStore) error {
 	storedGenesisHash, err := bcStore.GetBlockHash(genesisBlockHeight)
 
 	// FIXME use seele-defined common error instead of concrete levelDB error.
 	if err == errors.ErrNotFound {
-		return genesis.store(bcStore, accountStateDB)
+		return genesis.store(bcStore)
 	}
 
 	if err != nil {
@@ -128,17 +128,7 @@ func (genesis *Genesis) InitializeAndValidate(bcStore store.BlockchainStore, acc
 }
 
 // store atomically stores the genesis block in the blockchain store.
-func (genesis *Genesis) store(bcStore store.BlockchainStore, accountStateDB database.Database) error {
-	statedb, err := getStateDB(genesis.info)
-	if err != nil {
-		return err
-	}
-
-	batch := accountStateDB.NewBatch()
-	statedb.Commit(batch)
-	if err = batch.Commit(); err != nil {
-		return err
-	}
+func (genesis *Genesis) store(bcStore store.BlockchainStore) error {
 
 	return bcStore.PutBlockHeader(genesis.header.Hash(), genesis.header, genesis.header.Difficulty, true)
 }

@@ -83,12 +83,11 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 	}
 
 	// initialize and validate genesis
-	// TODO add different genesis for different shard
 	for i := 0; i < numOfShard; i++ {
 		bcStore := store.NewCachedStore(store.NewBlockchainDatabase(s.chainDB[i]))
 		genesis := core.GetGenesis(conf.SeeleConfig.GenesisConfig)
 
-		err = genesis.InitializeAndValidate(bcStore, s.accountStateDB)
+		err = genesis.InitializeAndValidate(bcStore)
 		if err != nil {
 			for i := 0; i < numOfShard; i++ {
 				s.chainDB[i].Close()
