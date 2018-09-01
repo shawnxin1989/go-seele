@@ -140,10 +140,8 @@ func getStateDB(info GenesisInfo) (*state.Statedb, error) {
 	}
 
 	for addr, amount := range info.Accounts {
-		if !common.IsShardEnabled() || addr.Shard() == info.ShardNumber {
-			statedb.CreateAccount(addr)
-			statedb.SetBalance(addr, amount)
-		}
+		statedb.CreateAccount(addr)
+		statedb.SetBalance(addr, amount)
 	}
 
 	return statedb, nil
