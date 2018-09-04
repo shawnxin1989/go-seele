@@ -219,8 +219,7 @@ func (pool *TransactionPool) AddTransaction(tx *types.Transaction) error {
 		return nil
 	}
 
-	// TODO: GetCurrentState should be separated from shard info
-	statedb, err := pool.chain.GetCurrentState()
+	statedb, err := core.GetCurrentState()
 	if err != nil {
 		return fmt.Errorf("get current state db failed, error %s", err)
 	}
