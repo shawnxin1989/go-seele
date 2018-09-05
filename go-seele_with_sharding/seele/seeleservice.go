@@ -17,8 +17,10 @@ import (
 	"github.com/seeleteam/go-seele/miner"
 	"github.com/seeleteam/go-seele/node"
 	"github.com/seeleteam/go-seele/p2p"
+	"github.com/seeleteam/go-seele/common"
 	rpc "github.com/seeleteam/go-seele/rpc2"
 	"github.com/seeleteam/go-seele/seele/download"
+	"github.com/seeleteam/go-seele/core/state"
 )
 
 // SeeleService implements full node service.
@@ -32,6 +34,7 @@ type SeeleService struct {
 	chains        [numOfShard]*core.Blockchain
 	chainDBs      [numOfShard]database.Database // database used to store blocks.
 	accountStateDB database.Database // database used to store account state info.
+	accountStateDBRootHash common.Hash
 	miner          *miner.Miner
 }
 
@@ -46,6 +49,11 @@ func (s *SeeleService) NetVersion() uint64            { return s.networkID }
 func (s *SeeleService) Miner() *miner.Miner           { return s.miner }
 func (s *SeeleService) Downloader() *downloader.Downloader {
 	return s.seeleProtocol.Downloader()
+}
+
+// GetCurrentState returns the current state of the accounts
+func (s *SeeleService) GetCurrentState() (*state.Statedb, error) {
+	return state.NewStatedb(s.accountStateDBRootHash, s.accountStateDB)
 }
 
 // NewSeeleService create SeeleService
@@ -71,6 +79,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 		leveldb.StartMetrics(s.chainDBs[i], "chaindb"+shardNumString, log)
 	}
 	// Initialize account state info DB.
+	// TODO: initialize the accountStateDBRootHash
 	accountStateDBPath := filepath.Join(serviceContext.DataDir, AccountStateDir)
 	log.Info("NewSeeleService account state datadir is %s", accountStateDBPath)
 	s.accountStateDB, err = leveldb.NewLevelDB(accountStateDBPath)
@@ -121,7 +130,7 @@ func NewSeeleService(ctx context.Context, conf *node.Config, log *log.SeeleLog) 
 			return nil, err
 		}
 
-		s.txPools[i], err = core.NewTransactionPool(conf.SeeleConfig.TxConf, s.chains[i], i)
+		s.txPools[i], err = core.NewTransactionPool(conf.SeeleConfig.TxConf, s.chains[i], i, statedb)
 		if err != nil {
 			for i := 0; i < numOfShard; i++ {
 				s.chainDBs[i].Close()

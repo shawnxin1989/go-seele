@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/seeleteam/go-seele/seele"
 	"github.com/seeleteam/go-seele/common"
 	"github.com/seeleteam/go-seele/core/state"
 	"github.com/seeleteam/go-seele/core/store"
@@ -61,7 +62,7 @@ type TransactionPool struct {
 }
 
 // NewTransactionPool creates and returns a transaction pool.
-func NewTransactionPool(config TransactionPoolConfig, chain blockchain, shard uint) (*TransactionPool, error) {
+func NewTransactionPool(config TransactionPoolConfig, chain blockchain, shard uint, statedb *state.Statedb) (*TransactionPool, error) {
 	header, err := chain.GetStore().GetHeadBlockHash()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get chain header, %s", err)
@@ -80,7 +81,7 @@ func NewTransactionPool(config TransactionPoolConfig, chain blockchain, shard ui
 	}
 
 	event.ChainHeaderChangedEventMananger.AddAsyncListener(pool.chainHeaderChanged)
-	go pool.MonitorChainHeaderChange()
+	go pool.MonitorChainHeaderChange(statedb)
 
 	return pool, nil
 }
@@ -103,7 +104,7 @@ func (pool *TransactionPool) chainHeaderChanged(e event.Event) {
 }
 
 // MonitorChainHeaderChange monitor and handle chain header event
-func (pool *TransactionPool) MonitorChainHeaderChange() {
+func (pool *TransactionPool) MonitorChainHeaderChange(statedb *state.Statedb) {
 	for {
 		select {
 		case newHeader := <-pool.chainHeaderChangeChannel:
@@ -113,7 +114,7 @@ func (pool *TransactionPool) MonitorChainHeaderChange() {
 			}
 
 			reinject := getReinjectTransaction(pool.chain.GetStore(), newHeader, pool.lastHeader, pool.log)
-			count := pool.addTransactions(reinject)
+			count := pool.addTransactions(reinject, statedb)
 			if count > 0 {
 				pool.log.Info("add %d reinject transactions", count)
 			}
@@ -199,10 +200,10 @@ func getReinjectTransaction(chainStore store.BlockchainStore, newHeader, lastHea
 	return nil
 }
 
-func (pool *TransactionPool) addTransactions(txs []*types.Transaction) int {
+func (pool *TransactionPool) addTransactions(txs []*types.Transaction, statedb *state.Statedb) int {
 	count := 0
 	for _, tx := range txs {
-		if err := pool.AddTransaction(tx); err != nil {
+		if err := pool.AddTransaction(tx, statedb); err != nil {
 			pool.log.Debug("add transaction failed, %s", err)
 		} else {
 			count++
@@ -214,14 +215,9 @@ func (pool *TransactionPool) addTransactions(txs []*types.Transaction) int {
 
 // AddTransaction adds a single transaction into the pool if it is valid and returns nil.
 // Otherwise, return the concrete error.
-func (pool *TransactionPool) AddTransaction(tx *types.Transaction) error {
+func (pool *TransactionPool) AddTransaction(tx *types.Transaction, statedb *state.Statedb) error {
 	if tx == nil {
 		return nil
-	}
-
-	statedb, err := core.GetCurrentState()
-	if err != nil {
-		return fmt.Errorf("get current state db failed, error %s", err)
 	}
 
 	return pool.addTransactionWithStateInfo(tx, statedb)

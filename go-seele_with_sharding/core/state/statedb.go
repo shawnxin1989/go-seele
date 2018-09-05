@@ -49,6 +49,7 @@ func NewStatedb(root common.Hash, db database.Database) (*Statedb, error) {
 	}, nil
 }
 
+
 // GetCopy is a memory copy of state db.
 func (s *Statedb) GetCopy() (*Statedb, error) {
 	copyObjecsFunc := func(src map[common.Address]*stateObject) map[common.Address]*stateObject {
