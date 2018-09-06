@@ -206,7 +206,12 @@ func (sp *SeeleProtocol) broadcastChainHead() {
 func (sp *SeeleProtocol) syncTransactions(p *peer) {
 	defer sp.wg.Done()
 	sp.wg.Add(1)
-	pending := sp.txPool.GetTransactions(false, true)
+
+	var pending []*types.Transaction
+	for i := 0; i < numOfShards; i++ {
+		pendingInOnePool := sp.txPool.GetTransactions(false, true)
+		pending = append(pending, pendingInOnePool...)
+	}
 
 	sp.log.Debug("syncTransactions peerid:%s pending length:%d", p.peerStrID, len(pending))
 	if len(pending) == 0 {
@@ -288,11 +293,16 @@ func (p *SeeleProtocol) handleAddPeer(p2pPeer *p2p.Peer, rw p2p.MsgReadWriter) {
 
 	newPeer := newPeer(SeeleVersion, p2pPeer, rw, p.log)
 
-	block := p.chain.CurrentBlock()
-	head := block.HeaderHash
-	localTD, err := p.chain.GetStore().GetBlockTotalDifficulty(head)
-	if err != nil {
-		return
+	block := make([]*types.Block,numOfShard)
+	head := make([]common.Hash,numOfShard)
+	localTD := make([]*big.Int,numOfShard)
+	for i := 0; i < numOfShard; i++ {
+		block[i] = p.chain[i].CurrentBlock()
+		head[i] = block[i].HeaderHash
+		localTD[i], err = p.chain[i].GetStore().GetBlockTotalDifficulty(head[i])
+		if err != nil {
+			return
+		}
 	}
 
 	if err := newPeer.handShake(p.networkID, localTD, head, common.EmptyHash); err != nil {
@@ -350,13 +360,6 @@ handler:
 		if err != nil {
 			p.log.Error("get error when read msg from %s, %s", peer.peerStrID, err)
 			break
-		}
-
-		// skip unsupported message from different shard peer
-		if peer.Node.Shard != common.LocalShardNumber {
-			if msg.Code != transactionsMsgCode {
-				continue
-			}
 		}
 
 		if common.PrintExplosionLog {

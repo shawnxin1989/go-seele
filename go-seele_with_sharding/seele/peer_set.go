@@ -67,7 +67,6 @@ func (p *peerSet) Remove(address common.Address) {
 	result := p.peerMap[address]
 	if result != nil {
 		delete(p.peerMap, address)
-		delete(p.shardPeers[result.Node.Shard], address)
 	}
 }
 
@@ -79,11 +78,9 @@ func (p *peerSet) Add(pe *peer) {
 	result := p.peerMap[address]
 	if result != nil {
 		delete(p.peerMap, address)
-		delete(p.shardPeers[result.Node.Shard], address)
 	}
 
 	p.peerMap[address] = pe
-	p.shardPeers[pe.Node.Shard][address] = pe
 }
 
 func (p *peerSet) ForEach(handle func(*peer) bool) {

@@ -45,8 +45,8 @@ type peer struct {
 	peerID    common.Address // id of the peer
 	peerStrID string
 	version   uint // Seele protocol version negotiated
-	head      []common.Hash
-	td        []*big.Int // total difficulty
+	head     []common.Hash
+	td       []*big.Int // total difficulty
 	lock      sync.RWMutex
 
 	rw p2p.MsgReadWriter // the read write method for this peer
@@ -72,10 +72,14 @@ func newPeer(version uint, p *p2p.Peer, rw p2p.MsgReadWriter, log *log.SeeleLog)
 		panic(err)
 	}
 
+	tds := make([]*big.Int, numOfShard)
+	for i := 0; i < numOfShard; i++ {
+		tds[i] = big.NewInt(0)
+	}
 	return &peer{
 		Peer:        p,
 		version:     version,
-		td:          big.NewInt(0),
+		td:          tds,
 		peerID:      p.Node.ID,
 		peerStrID:   idToStr(p.Node.ID),
 		knownTxs:    knownTxsCache,
@@ -86,13 +90,14 @@ func newPeer(version uint, p *p2p.Peer, rw p2p.MsgReadWriter, log *log.SeeleLog)
 }
 
 // Info gathers and returns a collection of metadata known about a peer.
+// TODO: modify Info by supporting multiple hashes and tds
 func (p *peer) Info() *PeerInfo {
-	hash, td := p.Head()
+	//hash, td := p.Head()
 
 	return &PeerInfo{
 		Version:    p.version,
-		Difficulty: td,
-		Head:       hex.EncodeToString(hash[0:]),
+		//Difficulty: td,
+		//Head:       hex.EncodeToString(hash[0:]),
 	}
 }
 
@@ -254,7 +259,7 @@ func (p *peer) sendHeadStatus(msg *chainHeadStatus) error {
 }
 
 // handShake exchange networkid td etc between two connected peers.
-func (p *peer) handShake(networkID uint64, td *big.Int, head common.Hash, genesis common.Hash) error {
+func (p *peer) handShake(networkID uint64, td []*big.Int, head []common.Hash, genesis common.Hash) error {
 	msg := &statusData{
 		ProtocolVersion: uint32(SeeleVersion),
 		NetworkID:       networkID,
