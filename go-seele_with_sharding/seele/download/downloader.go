@@ -77,9 +77,9 @@ type Downloader struct {
 	peers      map[string]*peerConn // peers map. peerID=>peer
 
 	syncStatus int
-	tm         *taskMgr
+	tm         []*taskMgr
 
-	chain     *core.Blockchain
+	chain     []*core.Blockchain
 	sessionWG sync.WaitGroup
 	log       *log.SeeleLog
 	lock      sync.RWMutex
