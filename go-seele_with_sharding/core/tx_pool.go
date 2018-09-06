@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/seeleteam/go-seele/seele"
 	"github.com/seeleteam/go-seele/common"
 	"github.com/seeleteam/go-seele/core/state"
 	"github.com/seeleteam/go-seele/core/store"
