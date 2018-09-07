@@ -62,6 +62,8 @@ type Miner struct {
 	threads              int
 	isFirstBlockPrepared int32
 	hashrate             metrics.Meter // Meter tracking the average hashrate
+
+	Shard     uint
 }
 
 // NewMiner constructs and returns a miner instance
@@ -192,6 +194,7 @@ func (miner *Miner) IsMining() bool {
 }
 
 // downloaderEventCallback handles events which indicate the downloader state
+// TODO: miner stops only when the new block is in the same shard 
 func (miner *Miner) downloaderEventCallback(e event.Event) {
 	if atomic.LoadInt32(&miner.isFirstDownloader) == 0 {
 		return

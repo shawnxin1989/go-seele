@@ -175,23 +175,23 @@ func (sp *SeeleProtocol) synchronise(bestPeers []*bestPeerForEachShard) {
 		}
 
 		//broadcast chain head
-		sp.broadcastChainHead()
+		sp.broadcastChainHead(i)
 	}
 }
 
-func (sp *SeeleProtocol) broadcastChainHead() {
-	block := sp.chain.CurrentBlock()
+func (sp *SeeleProtocol) broadcastChainHead(shard uint) {
+	block := sp.chain[shard].CurrentBlock()
 	head := block.HeaderHash
-	localTD, err := sp.chain.GetStore().GetBlockTotalDifficulty(head)
+	localTD, err := sp.chain[shard].GetStore().GetBlockTotalDifficulty(head)
 	if err != nil {
 		sp.log.Error("broadcastChainHead GetBlockTotalDifficulty err. %s", err)
 		return
 	}
 
-	// TODO: add shard info
 	status := &chainHeadStatus{
 		TD:           localTD,
 		CurrentBlock: head,
+		Shard:        shard,
 	}
 	sp.peerSet.ForEach(func(peer *peer) bool {
 		err := peer.sendHeadStatus(status)
@@ -282,6 +282,7 @@ func (p *SeeleProtocol) handleNewMinedBlock(e event.Event) {
 	p.log.Debug("handleNewMinedBlock broadcast chainhead changed. new block: %d %s <- %s ",
 		block.Header.Height, block.HeaderHash.ToHex(), block.Header.PreviousBlockHash.ToHex())
 
+	// TODO: add shard info
 	p.broadcastChainHead()
 }
 
