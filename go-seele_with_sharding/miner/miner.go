@@ -219,7 +219,6 @@ func (miner *Miner) downloaderEventCallback(e event.Event) {
 }
 
 // newTxCallback handles the new tx event
-// TODO: add shard info 
 func (miner *Miner) newTxCallback(e event.Event) {
 	if common.PrintExplosionLog {
 		miner.log.Debug("got the new tx event")
@@ -227,7 +226,7 @@ func (miner *Miner) newTxCallback(e event.Event) {
 
 	// if not mining, start mining
 	if atomic.LoadInt32(&miner.stopped) == 0 && atomic.LoadInt32(&miner.canStart) == 1 && atomic.CompareAndSwapInt32(&miner.mining, 0, 1) {
-		if err := miner.prepareNewBlock(shard); err != nil {
+		if err := miner.prepareNewBlock(miner.Shard); err != nil {
 			miner.log.Warn(err.Error())
 			atomic.StoreInt32(&miner.mining, 0)
 		}
