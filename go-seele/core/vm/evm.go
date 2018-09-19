@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/crypto"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/crypto"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already

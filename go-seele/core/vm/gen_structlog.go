@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/seeleteam/go-seele-one-shard/common"
+	"github.com/seeleteam/go-seele/common"
 )
 
 var _ = (*structLogMarshaling)(nil)

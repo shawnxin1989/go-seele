@@ -9,8 +9,8 @@ import (
 	"math/big"
 
 	"github.com/hashicorp/golang-lru"
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/core/types"
 )
 
 const (

@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
-	"github.com/seeleteam/go-seele-one-shard/database/leveldb"
+	"github.com/seeleteam/go-seele/core/types"
+	"github.com/seeleteam/go-seele/database/leveldb"
 )
 
 func getTestBlock(t *testing.T, difficulty int64) *types.Block {

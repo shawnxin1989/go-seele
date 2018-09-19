@@ -8,9 +8,9 @@ package system
 import (
 	"errors"
 
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/core/state"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/core/state"
+	"github.com/seeleteam/go-seele/core/types"
 )
 
 // Context provides information that required in system contract.

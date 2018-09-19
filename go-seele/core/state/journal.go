@@ -8,7 +8,7 @@ package state
 import (
 	"math/big"
 
-	"github.com/seeleteam/go-seele-one-shard/common"
+	"github.com/seeleteam/go-seele/common"
 )
 
 type journalEntry interface {

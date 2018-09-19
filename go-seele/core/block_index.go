@@ -9,9 +9,9 @@ import (
 	"math/big"
 
 	"github.com/orcaman/concurrent-map"
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/core/state"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/core/state"
+	"github.com/seeleteam/go-seele/core/types"
 )
 
 // BlockIndex is the index of the block chain

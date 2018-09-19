@@ -5,7 +5,7 @@
 
 package main
 
-import "github.com/seeleteam/go-seele-one-shard/cmd/tool/cmd"
+import "github.com/seeleteam/go-seele/cmd/tool/cmd"
 
 func main() {
 	cmd.Execute()

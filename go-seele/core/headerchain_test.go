@@ -10,11 +10,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/core/store"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
-	"github.com/seeleteam/go-seele-one-shard/database"
-	"github.com/seeleteam/go-seele-one-shard/database/leveldb"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/core/store"
+	"github.com/seeleteam/go-seele/core/types"
+	"github.com/seeleteam/go-seele/database"
+	"github.com/seeleteam/go-seele/database/leveldb"
 )
 
 func newTestHeaderChain(db database.Database) *HeaderChain {

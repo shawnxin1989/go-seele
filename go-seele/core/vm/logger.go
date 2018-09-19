@@ -25,8 +25,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/core/types"
 )
 
 type Storage map[common.Hash]common.Hash

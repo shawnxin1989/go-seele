@@ -9,7 +9,7 @@ import (
 	"container/heap"
 	"sort"
 
-	"github.com/seeleteam/go-seele-one-shard/core/types"
+	"github.com/seeleteam/go-seele/core/types"
 )
 
 type heapItem struct {

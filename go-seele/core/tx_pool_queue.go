@@ -8,8 +8,8 @@ package core
 import (
 	"container/heap"
 
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/core/types"
 )
 
 type txHeapByFee []*txCollection

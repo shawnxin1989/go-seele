@@ -9,9 +9,9 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/common/hexutil"
-	"github.com/seeleteam/go-seele-one-shard/crypto"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/common/hexutil"
+	"github.com/seeleteam/go-seele/crypto"
 	"github.com/spf13/cobra"
 )
 

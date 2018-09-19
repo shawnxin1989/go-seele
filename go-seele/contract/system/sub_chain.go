@@ -8,7 +8,7 @@ package system
 import (
 	"encoding/json"
 
-	"github.com/seeleteam/go-seele-one-shard/common"
+	"github.com/seeleteam/go-seele/common"
 )
 
 const (

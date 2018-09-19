@@ -3,11 +3,11 @@ package system
 import (
 	"testing"
 
-	"github.com/seeleteam/go-seele-one-shard/common"
-	"github.com/seeleteam/go-seele-one-shard/core/state"
-	"github.com/seeleteam/go-seele-one-shard/core/types"
-	"github.com/seeleteam/go-seele-one-shard/database"
-	"github.com/seeleteam/go-seele-one-shard/database/leveldb"
+	"github.com/seeleteam/go-seele/common"
+	"github.com/seeleteam/go-seele/core/state"
+	"github.com/seeleteam/go-seele/core/types"
+	"github.com/seeleteam/go-seele/database"
+	"github.com/seeleteam/go-seele/database/leveldb"
 	"github.com/stretchr/testify/assert"
 )
 
